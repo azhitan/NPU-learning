@@ -1,8 +1,8 @@
 # 总览
 
-- `UCP`：统一计算平台，定义了一套统一的异构编程接口，供应用程序接口（Application Programming Interface，以下简称API）实现对计算平台上所有资源的调用。 UCP将SOC上的功能硬件抽象出来并进行封装，对外提供基于功能的API，用于创建相应的UCP任务（如VP算子任务），并支持设置硬件Backend提交至UCP调度器， UCP可基于硬件资源，完成SOC上任务的统一调度。 具体提供了以下几个功能： 视觉处理(Vision Process)、 神经网络模型推理（Neural Network）、 高性能计算库（High Performance Library）、 自定义算子插件开发。
+- `UCP`：统一计算平台，定义了一套统一的异构编程接口，供应用程序接口（Application Programming Interface，以下简称API）实现对计算平台上所有资源的调�[...]
 
-  https://doc.oe.horizon.auto/static/image/diagram_arch.c7232816f1.png<img width="2021" height="1209" alt="image" src="https://github.com/user-attachments/assets/a7b1f3a3-6a6b-4615-9191-0b1086f3c8dd" />
+  https://doc.oe.horizon.auto/static/image/diagram_arch.c7232816f1.png<img width="2021" height="1209" alt="image" src="https://github.com/user-attachments/assets/a7b1f3a3-6a6b-4615-9191-0b1086f3c8dd" [...]
 
 
 - UCP 优势：
@@ -13,7 +13,7 @@
 
 - 两种工作模式
   - 直连模式
-  - 中继模式，中继模式下，支持多进程任务的统一调度，使用中继模式前，首先启动 `ucp_service`，service文件位于 `deps_aarch64/ucp/bin/service/` 路径下， 并通过设置环境变量 `HB_UCP_ENABLE_RELAY_MODE=true` 来启用Relay模式，使得用户进程可以通过中继服务进行通信。 无论是直连模式还是中继模式，UCP接口的调用方式保持一致，不会对编程逻辑产生影响。您可以根据实际需求灵活选择这两种模式，以满足系统在性能和灵活性方面的要求。
+  - 中继模式，中继模式下，支持多进程任务的统一调度，使用中继模式前，首先启动 `ucp_service`，service文件位于 `deps_aarch64/ucp/bin/service/` 路径下， ��[...]
 
 # 接口使用流程
 
@@ -38,7 +38,7 @@ int main() {
 
 ### 异步执行
 
-创建任务时，需要提前将`taskHandle`参数初始化为`nullptr`； 提交UCP任务（hbUCPSubmitTask）后，在线程指定位置执行接口（hbUCPWaitTaskDone），等待任务完成。
+创建任务时，需要提前将`taskHandle`参数初始化为`nullptr`； 提交UCP任务（hbUCPSubmitTask）后，在线程指定位置执行接口（hbUCPWaitTaskDone），等待任务完成�[...]
 
 ```
 #include "hobot/hb_ucp.h"
@@ -122,3 +122,18 @@ int main() {
 - 同步执行不支持配置任务的控制参数和后端选择，UCP会根据当前任务的可执行backend，以及硬件负载信息，选择合适的硬件执行。
 - 异步执行支持配置任务的控制参数和后端选择，不指定则基于各后端负载均衡选择。
   
+
+## 概念与模型部署
+
+| 概念 | 模型部署 |
+| --- | --- |
+| 上板模型 | hbm |
+| 对照基准 | quantized_model.bc（含 quantized_removed_model.bc） |
+| 运行时框架 | UCP |
+| 推理接口 | hbDNNInferV2 / hbUCPSubmitTask / hbUCPWaitTaskDone |
+| 内存申请 | hbUCPMalloc / hbUCPMallocCached |
+| 张量属性 | hbDNNTensorProperties（validShape / stride / alignedByteSize） |
+| 性能评测 | hrt_model_exec perf |
+| 精度评测 | hrt_model_exec infer / hbm_infer |
+| 资源监控 | hrt_ucp_monitor |
+| 调度追踪 | UCP Trace |
